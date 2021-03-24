@@ -45,15 +45,12 @@ async function connectAndPublish() {
 
   client.on("connect", (connack) => {
     console.log("CONNECTED TO MQTT BROKER");
-    // we only need to subscribe if a session is not present
-    if (!connack.sessionPresent) {
-      console.log(`SUBSCRIBING TO TOPICS ${subscribeTopics}`);
-      client.subscribe(subscribeTopics, { qos: 2 }, (err) => {
-        if (!err) {
-          console.log("SUCCESSFULLY SUBSCRIBED");
-        }
-      });
-    }
+    console.log(`SUBSCRIBING TO TOPICS ${subscribeTopics}`);
+    client.subscribe(subscribeTopics, { qos: 2 }, (err) => {
+      if (!err) {
+        console.log("SUCCESSFULLY SUBSCRIBED");
+      }
+    });
     const data = JSON.stringify({
       deviceId,
       messageType: "DATA",

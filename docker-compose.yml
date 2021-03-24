@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  tcp-iot-device:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROTOCOL: tcp
+    depends_on:
+      - tcp-iot-server
+    command: node iot-device.js
+  tcp-iot-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROTOCOL: tcp
+    command: node iot-server.js
+  mqtt-iot-device:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROTOCOL: mqtt
+    depends_on:
+      - tcp-iot-server
+    command: node iot-device.js
+  mqtt-iot-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROTOCOL: mqtt
+    command: node iot-server.js
