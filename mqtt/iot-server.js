@@ -11,15 +11,15 @@ const client = mqtt.connect(config.broker, {
   clientId: `mqtt-blog-example-iot-server`,
 });
 
-const dataTopicSub = config.dataTopic.replace("<DEVICE_ID>", "+");
-const cmdRespTopicSub = config.commandResponseTopic.replace("<DEVICE_ID>", "+");
-const registerTopic = config.registerTopic.replace("<DEVICE_ID>", "+");
+const dataTopicSub = `${config.dataTopic}/+`;
+const cmdRespTopicSub = `${config.commandResponseTopic}/+`;
+const registerTopic = `${config.registerTopic}/+`;
 const subscribeTopics = [dataTopicSub, cmdRespTopicSub, registerTopic];
 
 client.on("connect", () => {
   console.log("CONNECTED TO MQTT BROKER");
   console.log(`SUBSCRIBING TO TOPICS ${subscribeTopics}`);
-  client.subscribe(subscribeTopics, function (err) {
+  client.subscribe(subscribeTopics, { qos: 2 }, (err) => {
     if (!err) {
       console.log("SUCCESSFULLY SUBSCRIBED");
     }
@@ -27,9 +27,44 @@ client.on("connect", () => {
 });
 
 client.on("message", (topic, message) => {
-  console.log(`RECEIVED MESSAGE "${message.toString()}" ON TOPIC ${topic}`);
-  storeData(message);
+  const msgString = message.toString();
+  console.log(`RECEIVED MESSAGE "${msgString}" ON TOPIC ${topic}`);
+  const splitTopic = topic.split("/");
+  const deviceId = splitTopic.pop();
+  switch (splitTopic.join("/")) {
+    case config.dataTopic:
+      storeData(msgString);
+      break;
+    case config.commandResponseTopic:
+      storeData(msgString);
+      break;
+    case config.registerTopic:
+      if (msgString === "SIGN_IN") commandSender.start(deviceId);
+      if (msgString === "SIGN_OUT") commandSender.stop(deviceId);
+      break;
+    default:
+      console.error("DATA RECEIVED FROM UNKNOWN TOPIC");
+      break;
+  }
 });
+
+const commandSender = {
+  activeDevices: {},
+  start: function (deviceId) {
+    if (deviceId in this.activeDevices) return;
+    this.activeDevices[deviceId] = setInterval(() => {
+      const command = JSON.stringify({ uuid: uuidv4(), command: "PING" });
+      console.log(`SENDING COMMAND TO ${deviceId}: ${command}`);
+      client.publish(`${config.commandRequestTopic}/${deviceId}`, command, { qos: 2 });
+    }, 10000);
+  },
+  stop: function (deviceId) {
+    if (deviceId in this.activeDevices) {
+      clearInterval(this.activeDevices[deviceId]);
+      delete this.activeDevices[deviceId];
+    }
+  }
+};
 
 // dummy function pretending to store data
 function storeData(data) {

@@ -9,10 +9,10 @@ const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
 console.log(`STARTING MQTT IOT DEVICE <${deviceId}>`);
 
-const dataTopic = config.dataTopic.replace("<deviceId>", deviceId);
-const cmdRespTopic = config.commandResponseTopic.replace("<deviceId>", deviceId);
-const registerTopic = config.registerTopic.replace("<deviceId>", deviceId);
-const cmdReqTopic = config.commandRequestTopic.replace("<deviceId>", deviceId);
+const dataTopic = `${config.dataTopic}/${deviceId}`;
+const cmdRespTopic = `${config.commandResponseTopic}/${deviceId}`;
+const registerTopic = `${config.registerTopic}/${deviceId}`;
+const cmdReqTopic = `${config.commandRequestTopic}/${deviceId}`;
 const subscribeTopics = [cmdReqTopic];
 
 const client = mqtt.connect(config.broker, {
@@ -29,7 +29,7 @@ const client = mqtt.connect(config.broker, {
 client.on("connect", (connack) => {
   console.log("CONNECTED TO MQTT BROKER");
   console.log(`SUBSCRIBING TO TOPICS ${subscribeTopics}`);
-  client.subscribe(subscribeTopics, { qos: 2 }, function (err) {
+  client.subscribe(subscribeTopics, { qos: 2 }, (err) => {
     if (!err) {
       console.log("SUCCESSFULLY SUBSCRIBED");
     }
