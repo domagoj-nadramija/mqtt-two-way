@@ -1,9 +1,9 @@
 const net = require("net");
 const fs = require("fs");
 
-const device_id = "simulated-device-tcp-0001";
+const deviceId = "simulated-device-tcp-0001";
 
-console.log(`STARTING TCP IOT DEVICE <${device_id}>`);
+console.log(`STARTING TCP IOT DEVICE <${deviceId}>`);
 
 const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
@@ -13,12 +13,12 @@ const client = new net.Socket();
 
 client.connect(config.server.port, config.server.host, function () {
   console.log("CONNECTED TO SERVER");
-  client.write(JSON.stringify({ device_id, message_type: "SIGNUP" }));
+  client.write(JSON.stringify({ deviceId, messageType: "SIGNUP" }));
   // this simulates the device collecting and sending sensor data
   const dataSendInterval = setInterval(() => {
     const data = JSON.stringify({
-      device_id,
-      message_type: "DATA",
+      deviceId,
+      messageType: "DATA",
       temp: 23.6,
       lat: 48.015722,
       lng: -88.625528,
@@ -30,11 +30,11 @@ client.connect(config.server.port, config.server.host, function () {
   client.on("data", (data) => {
     const command = JSON.parse(data.toString());
     console.log("RECEIVED COMMAND: " + data.toString());
-    const command_result = execute(command.command);
+    const commandResult = execute(command.command);
     const commandResp = JSON.stringify({
-      device_id,
-      message_type: "COMMAND_RESP",
-      command_result,
+      deviceId,
+      messageType: "commandResp",
+      commandResult,
       ...command,
     });
     console.log(`SENDING COMMAND RESPONSE ${commandResp}`);

@@ -19,7 +19,6 @@ const server = net.createServer((socket) => {
 
   socket.on("data", (data) => {
     console.log(`RECEIVED DATA FROM ${connPort}: ${data.toString()}`);
-
     storeData(data);
   });
   socket.on("close", () => {
