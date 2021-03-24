@@ -6,11 +6,12 @@ const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
 console.log("STARTING MQTT IOT SERVER");
 
+const zeroPaddedNumStr = String(Math.floor(Math.random() * 9999 + 1)).padStart(4,"0");
 const client = mqtt.connect(config.broker, {
   // signals the broker we want a persistent session
   clean: false,
   // identifies the client to the broker for the persistent session
-  clientId: `mqtt-blog-example-iot-server`,
+  clientId: `test-iot-server-${zeroPaddedNumStr}`,
 });
 
 // our server wants to receive data from multiple devices, so we will use the + wildcard

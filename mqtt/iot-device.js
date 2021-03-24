@@ -1,7 +1,8 @@
 const mqtt = require("mqtt");
 const fs = require("fs");
 
-const deviceId = "test-device-mqtt-0001";
+const zeroPaddedNumStr = String(Math.floor(Math.random() * 9999 + 1)).padStart(4,"0");
+const deviceId = `iot-device-${zeroPaddedNumStr}`;
 
 const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
@@ -18,7 +19,7 @@ const mqttClientOpts = {
   // signals the broker we want a persistent session
   clean: false,
   // identifies the client to the broker for the persistent session
-  clientId: `${deviceId}-mqtt-client`,
+  clientId: `${deviceId}-client`,
   // configures the last will and testament message
   will: {
     qos: 2,
