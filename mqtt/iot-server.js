@@ -7,10 +7,13 @@ const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 console.log("STARTING MQTT IOT SERVER");
 
 const client = mqtt.connect(config.broker, {
+  // signals the broker we want a persistent session
   clean: false,
+  // identifies the client to the broker for the persistent session
   clientId: `mqtt-blog-example-iot-server`,
 });
 
+// our server wants to receive data from multiple devices, so we will use the + wildcard
 const dataTopicSub = `${config.dataTopic}/+`;
 const cmdRespTopicSub = `${config.commandResponseTopic}/+`;
 const registerTopic = `${config.registerTopic}/+`;
@@ -31,6 +34,7 @@ client.on("message", (topic, message) => {
   console.log(`RECEIVED MESSAGE "${msgString}" ON TOPIC ${topic}`);
   const splitTopic = topic.split("/");
   const deviceId = splitTopic.pop();
+  // after we stripped the device id, now we can match the topic against the ones we subscribed to
   switch (splitTopic.join("/")) {
     case config.dataTopic:
       storeData(msgString);
@@ -48,6 +52,7 @@ client.on("message", (topic, message) => {
   }
 });
 
+// command sender object is basically just for starting, containing and clearing the intervals
 const commandSender = {
   activeDevices: {},
   start: function (deviceId) {
@@ -63,7 +68,7 @@ const commandSender = {
       clearInterval(this.activeDevices[deviceId]);
       delete this.activeDevices[deviceId];
     }
-  }
+  },
 };
 
 // dummy function pretending to store data
