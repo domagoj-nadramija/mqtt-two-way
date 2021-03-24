@@ -1,0 +1,7 @@
+{
+    "broker": "mqtt://broker.hivemq.com",
+    "dataTopic": "mqtt/blog/examples/data/<DEVICE_ID>",
+    "commandRequestTopic": "mqtt/blog/examples/cmd/req/<DEVICE_ID>",
+    "commandResponseTopic": "mqtt/blog/examples/cmd/resp/<DEVICE_ID>",
+    "registerTopic": "mqtt/blog/examples/register/<DEVICE_ID>"
+}
