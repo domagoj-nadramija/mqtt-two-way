@@ -13,6 +13,7 @@ services:
     environment:
       SERVER_HOST: tcp-iot-server
       SERVER_PORT: 30000
+      DEVICE_ID: simulated-iot-device-0001
   tcp-iot-server:
     build:
       context: .
@@ -21,7 +22,6 @@ services:
         PROTOCOL: tcp
     command: node tcp/iot-server.js
     environment:
-      SERVER_HOST: tcp-iot-server
       SERVER_PORT: 30000
   mqtt-iot-device:
     build:
@@ -38,6 +38,7 @@ services:
       CMD_REQ_TOPIC: mqtt/blog/examples/cmd/req
       CMD_RESP_TOPIC: mqtt/blog/examples/cmd/resp
       REGISTER_TOPIC: mqtt/blog/examples/register
+      DEVICE_ID: simulated-iot-device-0001
   mqtt-iot-server:
     build:
       context: .
@@ -51,3 +52,4 @@ services:
       CMD_REQ_TOPIC: mqtt/blog/examples/cmd/req
       CMD_RESP_TOPIC: mqtt/blog/examples/cmd/resp
       REGISTER_TOPIC: mqtt/blog/examples/register
+      SERVER_ID: mqtt-example-server-0001

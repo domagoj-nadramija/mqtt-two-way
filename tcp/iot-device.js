@@ -1,11 +1,11 @@
 const net = require("net");
 const { getConfig, execute } = require("../common");
 
-const deviceId = "simulated-device-tcp-0001";
+const config = getConfig("tcp");
+
+const deviceId = config.deviceId;
 
 console.log(`STARTING TCP IOT DEVICE <${deviceId}>`);
-
-const config = getConfig("tcp");
 
 console.log(`WILL CONNECT TO ${config.server.host}:${config.server.port}`);
 

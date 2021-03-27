@@ -1,10 +1,9 @@
 const mqtt = require("mqtt");
 const { getConfig, execute } = require("../common");
 
-const zeroPaddedNumStr = String(Math.floor(Math.random() * 9999 + 1)).padStart(4,"0");
-const deviceId = `iot-device-${zeroPaddedNumStr}`;
-
 const config = getConfig("mqtt");
+
+const deviceId = config.deviceId;
 
 console.log(`STARTING MQTT IOT DEVICE <${deviceId}>`);
 
@@ -32,10 +31,15 @@ const mqttClientOpts = {
 // we need to send a sign-in message so that the server knows the device exists and can receive commands
 console.log("SENDING SIGN IN MESSAGE");
 const client = mqtt.connect(config.broker, mqttClientOpts);
-client.publish(registerTopic, "SIGN_IN", { qos: 2, retain: true }, () => {
-  client.end(false, { reasonCode: 0 });
-});
-
+client.publish(
+  registerTopic,
+  "SIGN_IN",
+  { qos: 2, retain: true, properties: { messageExpiryInterval: 60 * 5 } },
+  () => {
+    client.end(false, { reasonCode: 0 });
+  }
+);
+console.log("CONNECTING TO BROKER AND SENDING DATA EVERY 15 SECONDS");
 // we want to simulate a IoT device which is only occasionally online, so we run this every 15 seconds
 setInterval(() => connectAndPublish(), 15000);
 

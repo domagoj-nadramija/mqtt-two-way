@@ -8,15 +8,17 @@ function getConfig(protocol) {
         "dataTopic": process.env.DATA_TOPIC,
         "commandRequestTopic": process.env.CMD_REQ_TOPIC,
         "commandResponseTopic": process.env.CMD_RESP_TOPIC,
-        "registerTopic": process.env.REGISTER_TOPIC
+        "registerTopic": process.env.REGISTER_TOPIC,
+        "deviceId": process.env.DEVICE_ID,
+        "serverId": process.env.SERVER_ID
     };
     if (protocol == "tcp") return {
         "server": {
             "host": process.env.SERVER_HOST,
             "port": process.env.SERVER_PORT
-        }
+        },
+        "deviceId": process.env.DEVICE_ID
     };
-
 }
 
 // dummy function pretending to store data
