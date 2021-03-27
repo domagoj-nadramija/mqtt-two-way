@@ -1,7 +1,0 @@
-{
-    "broker": "mqtt://broker.hivemq.com",
-    "dataTopic": "mqtt/blog/examples/data",
-    "commandRequestTopic": "mqtt/blog/examples/cmd/req",
-    "commandResponseTopic": "mqtt/blog/examples/cmd/resp",
-    "registerTopic": "mqtt/blog/examples/register"
-}

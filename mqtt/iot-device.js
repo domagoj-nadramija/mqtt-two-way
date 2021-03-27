@@ -1,10 +1,10 @@
 const mqtt = require("mqtt");
-const fs = require("fs");
+const { getConfig, execute } = require("../common");
 
 const zeroPaddedNumStr = String(Math.floor(Math.random() * 9999 + 1)).padStart(4,"0");
 const deviceId = `iot-device-${zeroPaddedNumStr}`;
 
-const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
+const config = getConfig("mqtt");
 
 console.log(`STARTING MQTT IOT DEVICE <${deviceId}>`);
 
@@ -91,13 +91,3 @@ process.once("SIGINT", () => {
     client.end(false, { reasonCode: 0 }, () => process.exit(0));
   });
 });
-
-// dummy function pretending to execute a command
-function execute(command) {
-  switch (command) {
-    case "PING":
-      return "PONG";
-    default:
-      return "ERROR_UNKNOWN_COMMAND";
-  }
-}

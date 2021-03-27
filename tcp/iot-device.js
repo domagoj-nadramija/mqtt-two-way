@@ -1,11 +1,11 @@
 const net = require("net");
-const fs = require("fs");
+const { getConfig, execute } = require("../common");
 
 const deviceId = "simulated-device-tcp-0001";
 
 console.log(`STARTING TCP IOT DEVICE <${deviceId}>`);
 
-const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
+const config = getConfig("tcp");
 
 console.log(`WILL CONNECT TO ${config.server.host}:${config.server.port}`);
 
@@ -54,13 +54,3 @@ client.connect(config.server.port, config.server.host, function () {
     clearInterval(dataSendInterval);
   });
 });
-
-// dummy function pretending to execute a command
-function execute(command) {
-  switch (command) {
-    case "PING":
-      return "PONG";
-    default:
-      return "ERROR_UNKNOWN_COMMAND";
-  }
-}

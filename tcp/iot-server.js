@@ -1,9 +1,8 @@
 const net = require("net");
-const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const { getConfig, storeData } = require("../common");
 
-const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
-
+const config = getConfig("tcp");
 console.log(`STARTING TCP IOT SERVER ON PORT ${config.server.port}`);
 
 const server = net.createServer((socket) => {
@@ -35,9 +34,4 @@ const server = net.createServer((socket) => {
   });
 });
 
-server.listen(config.server.port, "127.0.0.1");
-
-// dummy function pretending to store data
-function storeData(data) {
-  console.log("Storing data...");
-}
+server.listen(config.server.port);

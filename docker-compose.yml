@@ -9,14 +9,20 @@ services:
         PROTOCOL: tcp
     depends_on:
       - tcp-iot-server
-    command: node iot-device.js
+    command: node tcp/iot-device.js
+    environment:
+      SERVER_HOST: tcp-iot-server
+      SERVER_PORT: 30000
   tcp-iot-server:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         PROTOCOL: tcp
-    command: node iot-server.js
+    command: node tcp/iot-server.js
+    environment:
+      SERVER_HOST: tcp-iot-server
+      SERVER_PORT: 30000
   mqtt-iot-device:
     build:
       context: .
@@ -25,11 +31,23 @@ services:
         PROTOCOL: mqtt
     depends_on:
       - tcp-iot-server
-    command: node iot-device.js
+    command: node mqtt/iot-device.js
+    environment:
+      BROKER: mqtt://broker.hivemq.com
+      DATA_TOPIC: mqtt/blog/examples/data
+      CMD_REQ_TOPIC: mqtt/blog/examples/cmd/req
+      CMD_RESP_TOPIC: mqtt/blog/examples/cmd/resp
+      REGISTER_TOPIC: mqtt/blog/examples/register
   mqtt-iot-server:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         PROTOCOL: mqtt
-    command: node iot-server.js
+    command: node mqtt/iot-server.js
+    environment:
+      BROKER: mqtt://broker.hivemq.com
+      DATA_TOPIC: mqtt/blog/examples/data
+      CMD_REQ_TOPIC: mqtt/blog/examples/cmd/req
+      CMD_RESP_TOPIC: mqtt/blog/examples/cmd/resp
+      REGISTER_TOPIC: mqtt/blog/examples/register

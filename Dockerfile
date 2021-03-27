@@ -11,4 +11,5 @@ COPY package*.json ./
 RUN npm install
 
 # Copy everything for the protocol
-COPY ${PROTOCOL}/* ./
+COPY ${PROTOCOL} ./${PROTOCOL}
+COPY common.js ./

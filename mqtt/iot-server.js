@@ -1,8 +1,8 @@
 const mqtt = require("mqtt");
-const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const { getConfig, storeData } = require("../common");
 
-const config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
+const config = getConfig("mqtt");
 
 console.log("STARTING MQTT IOT SERVER");
 
@@ -71,8 +71,3 @@ const commandSender = {
     }
   },
 };
-
-// dummy function pretending to store data
-function storeData(data) {
-  console.log("Storing data...");
-}
