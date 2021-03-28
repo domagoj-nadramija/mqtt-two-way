@@ -1,5 +1,5 @@
 const mqtt = require("mqtt");
-const { getConfig, execute } = require("../common");
+const { getConfig, execute, getDataPayload } = require("../common");
 
 const config = getConfig("mqtt");
 
@@ -28,20 +28,23 @@ const mqttClientOpts = {
   },
 };
 
-// we need to send a sign-in message so that the server knows the device exists and can receive commands
-console.log("SENDING SIGN IN MESSAGE");
+const pubSubOpts = { qos: 2 };
+const retainPubOpts = { qos: 2, retain: true, properties: { messageExpiryInterval: 60 * 5 } };
+
+// we need to: - subscribe first so that the broker knows which messages to store
+//             - send a sign-in message so that the server knows the device exists and can receive commands
+console.log("SUBSCRIBING AND SENDING SIGN IN MESSAGE");
 const client = mqtt.connect(config.broker, mqttClientOpts);
-client.publish(
-  registerTopic,
-  "SIGN_IN",
-  { qos: 2, retain: true, properties: { messageExpiryInterval: 60 * 5 } },
-  () => {
-    client.end(false, { reasonCode: 0 });
+client.subscribe(subscribeTopics, pubSubOpts, (err) => {
+  if (!err) {
+    console.log("SUCCESSFULLY SUBSCRIBED");
+    client.publish(registerTopic, "SIGN_IN", retainPubOpts, () => client.end());
   }
-);
+});
+
 console.log("CONNECTING TO BROKER AND SENDING DATA EVERY 15 SECONDS");
 // we want to simulate a IoT device which is only occasionally online, so we run this every 15 seconds
-setInterval(() => connectAndPublish(), 15000);
+const intervalSender = setInterval(() => connectAndPublish(), 15000);
 
 // this function will connect to the broker, publish some data and sleep for 5 seconds after which it will disconnect from the broker
 // while it is connected it will immediately receive commands. When it reconnects it will receive any missed commands
@@ -51,24 +54,18 @@ async function connectAndPublish() {
   client.on("connect", (connack) => {
     console.log("CONNECTED TO MQTT BROKER");
     console.log(`SUBSCRIBING TO TOPICS ${subscribeTopics}`);
-    client.subscribe(subscribeTopics, { qos: 2 }, (err) => {
+    client.subscribe(subscribeTopics, pubSubOpts, (err) => {
       if (!err) {
         console.log("SUCCESSFULLY SUBSCRIBED");
       }
     });
-    const data = JSON.stringify({
-      deviceId,
-      messageType: "DATA",
-      temp: 23.6,
-      lat: 48.015722,
-      lng: -88.625528,
-    });
+    const data = getDataPayload(deviceId);
     console.log(`SENDING DATA: ${data}`);
-    client.publish(dataTopic, data, { qos: 2 }, async () => {
+    client.publish(dataTopic, data, pubSubOpts, async () => {
       console.log("WAITING FOR 5 SECONDS");
       await new Promise((res) => setTimeout(res, 5000));
       console.log("CLOSING CONNECTION TO MQTT BROKER");
-      client.end(false, { reasonCode: 0 });
+      client.end();
     });
   });
 
@@ -83,15 +80,16 @@ async function connectAndPublish() {
       ...command,
     });
     console.log(`SENDING COMMAND RESPONSE ${commandResp}`);
-    client.publish(cmdRespTopic, commandResp, { qos: 2 });
+    client.publish(cmdRespTopic, commandResp, pubSubOpts);
   });
 }
 
 // if we terminate our device while it is disconnected we want to be sure that a sign-out message is sent
 process.once("SIGINT", () => {
+  clearInterval(intervalSender);
   console.log("SENDING SIGN OUT MESSAGE");
   const client = mqtt.connect(config.broker, mqttClientOpts);
-  client.publish(registerTopic, "SIGN_OUT", { qos: 2, retain: true, properties: { messageExpiryInterval: 60 * 5 } }, () => {
-    client.end(false, { reasonCode: 0 }, () => process.exit(0));
+  client.publish(registerTopic, "SIGN_OUT", retainPubOpts, () => {
+    client.end(() => process.exit(0));
   });
 });

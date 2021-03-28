@@ -1,5 +1,5 @@
 const net = require("net");
-const { getConfig, execute } = require("../common");
+const { getConfig, execute, getDataPayload } = require("../common");
 
 const config = getConfig("tcp");
 
@@ -16,13 +16,7 @@ client.connect(config.server.port, config.server.host, function () {
   client.write(JSON.stringify({ deviceId, messageType: "SIGNUP" }));
   // this simulates the device collecting and sending sensor data
   const dataSendInterval = setInterval(() => {
-    const data = JSON.stringify({
-      deviceId,
-      messageType: "DATA",
-      temp: 23.6,
-      lat: 48.015722,
-      lng: -88.625528,
-    });
+    const data = getDataPayload(deviceId);
     console.log(`SENDING DATA: ${data}`);
     client.write(data);
   }, 5000);
