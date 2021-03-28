@@ -36,4 +36,4 @@ function execute(command) {
   }
 }
 
-module.exports = { getConfig, storeData, execute}
+module.exports = { getConfig, storeData, execute};

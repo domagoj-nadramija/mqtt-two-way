@@ -18,7 +18,7 @@ const mqttClientOpts = {
   // signals the broker we want a persistent session
   clean: false,
   // identifies the client to the broker for the persistent session
-  clientId: `${deviceId}-client`,
+  clientId: `${deviceId}`,
   // configures the last will and testament message
   will: {
     qos: 2,
@@ -91,7 +91,7 @@ async function connectAndPublish() {
 process.once("SIGINT", () => {
   console.log("SENDING SIGN OUT MESSAGE");
   const client = mqtt.connect(config.broker, mqttClientOpts);
-  client.publish(registerTopic, "SIGN_OUT", { qos: 2, retain: true }, () => {
+  client.publish(registerTopic, "SIGN_OUT", { qos: 2, retain: true, properties: { messageExpiryInterval: 60 * 5 } }, () => {
     client.end(false, { reasonCode: 0 }, () => process.exit(0));
   });
 });

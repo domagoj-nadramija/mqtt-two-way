@@ -29,27 +29,20 @@ client.on("connect", () => {
   });
 });
 
-client.on("message", (topic, message) => {
+client.on("message", (rawTopic, message) => {
   const msgString = message.toString();
-  console.log(`RECEIVED MESSAGE "${msgString}" ON TOPIC ${topic}`);
-  const splitTopic = topic.split("/");
-  const deviceId = splitTopic.pop();
-  // after we stripped the device id, now we can match the topic against the ones we subscribed to
-  switch (splitTopic.join("/")) {
-    case config.dataTopic:
-      storeData(msgString);
-      break;
-    case config.commandResponseTopic:
-      storeData(msgString);
-      break;
-    case config.registerTopic:
-      if (msgString === "SIGN_IN") commandSender.start(deviceId);
-      if (msgString === "SIGN_OUT") commandSender.stop(deviceId);
-      break;
-    default:
-      console.error("DATA RECEIVED FROM UNKNOWN TOPIC");
-      break;
+  console.log(`RECEIVED MESSAGE "${msgString}" ON TOPIC ${rawTopic}`);
+  const splitRawTopic = rawTopic.split("/");
+  // the last element is the device id
+  const deviceId = splitRawTopic.pop();
+  const topic = splitRawTopic.join("/");
+  if (topic === config.dataTopic) return storeData(msgString);
+  if (topic === config.commandResponseTopic) return storeData(msgString);
+  if (topic === config.registerTopic) {
+    if (msgString === "SIGN_IN") return commandSender.start(deviceId);
+    if (msgString === "SIGN_OUT") return commandSender.stop(deviceId);
   }
+  return console.error("DATA RECEIVED FROM UNKNOWN TOPIC");
 });
 
 // command sender object is basically just for starting, containing and clearing the intervals

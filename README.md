@@ -1,2 +1,1 @@
-# mqtt-blog-examples
-Some code examples for my blog post on using MQTT
+# Code repository for "Two-way communication with IoT devices using MQTT"
