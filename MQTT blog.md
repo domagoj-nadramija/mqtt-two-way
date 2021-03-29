@@ -80,7 +80,7 @@ console.log(`WILL CONNECT TO ${config.server.host}:${config.server.port}`);
 
 const client = new net.Socket();
 
-client.connect(config.server.port, config.server.host, function () {
+client.connect(config.server.port, config.server.host, () => {
   console.log("CONNECTED TO SERVER");
   client.write(JSON.stringify({ deviceId, messageType: "SIGNUP" }));
   // this simulates the device collecting and sending sensor data
@@ -605,4 +605,3 @@ Of course, some things have become difficult. With a direct TCP connection we di
 However, despite these few drawbacks, the benefits are evident. That is why MQTT is a proven protocol in the IoT ecosystem and the number of devices and platforms supporting it is growing every day. It can even be used in the browser by using a broker that supports MQTT over Websockets.
 
 If you are interested in more information about MQTT, how it works and what other features it supports, I recommend you take a look at [MQTT Essentials](https://www.hivemq.com/mqtt-essentials/ created), a series of a articles written by the engineers at HiveMQ.
-

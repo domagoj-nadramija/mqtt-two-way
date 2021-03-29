@@ -11,7 +11,7 @@ console.log(`WILL CONNECT TO ${config.server.host}:${config.server.port}`);
 
 const client = new net.Socket();
 
-client.connect(config.server.port, config.server.host, function () {
+client.connect(config.server.port, config.server.host, () => {
   console.log("CONNECTED TO SERVER");
   client.write(JSON.stringify({ deviceId, messageType: "SIGNUP" }));
   // this simulates the device collecting and sending sensor data
