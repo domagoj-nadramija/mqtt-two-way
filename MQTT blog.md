@@ -62,7 +62,7 @@ const server = net.createServer((socket) => {
 server.listen(config.server.port);
 ```
 
-### TCP IoT sevice
+### TCP IoT device
 
 We also need a simulated TCP device which will initiate the TCP connection and publish data. When it receives a command it should "execute" it and send the command execution result to the server.
 
@@ -278,7 +278,7 @@ Since we don't want to risk duplicate messages, we're going to be using QoS 2 wh
 
 ### Topics
 
-A crucial aspect of the message flow are topics, which, as previously mentioned, the broker uses to filter messages. Topics are simply an UTF-8 string which consists of one or more topic levels which are separated by a forward slash. MQTT topics are very lightweight, meaning we can easily have millions of them, and they do not require initialization before publishing or subscribing to them.
+A crucial aspect of the message flow are topics, which, as previously mentioned, the broker uses to filter messages. Topics are simply a UTF-8 string which consists of one or more topic levels which are separated by a forward slash. MQTT topics are very lightweight, meaning we can easily have millions of them, and they do not require initialization before publishing or subscribing to them.
 
 ![topic basics](https://i.postimg.cc/9fHC45nw/topics-basics.png)
 
