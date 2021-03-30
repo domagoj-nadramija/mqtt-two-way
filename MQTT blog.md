@@ -4,7 +4,7 @@
 
 In this article we will briefly discuss the problem of two-way IoT communication, why “traditional” solutions are not a good fit and why a technology like MQTT is. We will also go into more detail on exactly how MQTT works and provide code examples for 2-way communication with both TCP and MQTT. 
 
-All examples are written using Node.js version 15.6.0 and are available at https://github.com/domagoj-nadramija/mqtt-two-way. I recommend using the provided docker compose file to run the examples. Configuration parameters are passed through environment variables. Read the README if you want to know more.
+All examples are written using Node.js version 15.6.0 and are available at https://github.com/domagoj-nadramija/mqtt-two-way. I recommend using the provided docker compose file to run the examples. Configuration parameters are passed through environment variables. Read the [README](https://github.com/domagoj-nadramija/mqtt-two-way/blob/main/README.md) if you want to know more.
 
 ## Using TCP for two-way communication
 
@@ -12,7 +12,7 @@ My team and I work on services responsible for data collection from a wide varie
 
 However, as IoT devices can be practically anything and can perform a multitude of roles, simply collecting data is not enough. To fully utilize their devices, our customers also need to be able to communicate with the devices themselves: whether to send commands or to change a configuration. As we are “closest” to the devices it is our responsibility to facilitate this 2-way communication, where possible.
 
-However, in most cases this is not as simple as sending a HTTP request to a URL. Devices do not have fixed addresses, and are often not even capable of running HTTP servers. In fact, most communication with devices is done directly via TCP.
+However, in most cases this is not as simple as sending an HTTP request to a URL. Devices do not have fixed addresses, and are often not even capable of running HTTP servers. In fact, most communication with devices is done directly via TCP.
 
 Fortunately, TCP connections are 2-way. This means that when a device establishes a TCP connection with our server to send some data, we can also send data back through that same TCP connection. That data would then hopefully be received and acted upon by the device.
 
@@ -123,7 +123,7 @@ client.connect(config.server.port, config.server.host, () => {
 
 Our configuration is loaded from environment variables, so be sure to include those somehow, like in a .env file. This is the configuration we will be using
 
-```json
+```properties
 DEVICE_ID=sim-iot-device-0001
 SERVER_HOST=127.0.0.1
 SERVER_PORT=30000
@@ -139,7 +139,9 @@ $ node tcp\iot-server.js
 
 We should be greeted with
 
-> STARTING TCP IOT SERVER ON PORT 30000
+```
+STARTING TCP IOT SERVER ON PORT 30000
+```
 
 and nothing else since the server is waiting for incoming connections.
 
@@ -151,34 +153,42 @@ $ node tcp\iot-device.js
 
 It will output some basic configuration information and hopefully announce that it has successfully connected to the server:
 
-> STARTING TCP IOT DEVICE <simulated-device-tcp-0001>
-> WILL CONNECT TO 127.0.0.1:30000
-> CONNECTED TO SERVER
+```console
+STARTING TCP IOT DEVICE <simulated-device-tcp-0001>
+WILL CONNECT TO 127.0.0.1:30000
+CONNECTED TO SERVER
+```
 
 And the server should receive a new connection and signup message which it will store:
 
-> NEW CONNECTION FROM 51165
-> RECEIVED DATA FROM 51165: {"deviceId":"simulated-device-tcp-0001","messageType":"SIGNUP"}
-> Storing data...
+```
+NEW CONNECTION FROM 51165
+RECEIVED DATA FROM 51165: {"deviceId":"simulated-device-tcp-0001","messageType":"SIGNUP"}
+Storing data...
+```
 
 After this the device will send data every 5 seconds and the server will send a command every 10 seconds for as long as the connection is maintained.
 
 This is a small excerpt of the logs during which the device published data twice and received a command for the server which it executed and returned a response
 
-> SENDING DATA: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
-> RECEIVED COMMAND: {"uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
-> SENDING COMMAND RESPONSE {"deviceId":"simulated-device-tcp-0001","messageType":"COMMAND_RESP","commandResult":"PONG","uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
-> SENDING DATA: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
+```
+SENDING DATA: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
+RECEIVED COMMAND: {"uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
+SENDING COMMAND RESPONSE {"deviceId":"simulated-device-tcp-0001","messageType":"COMMAND_RESP","commandResult":"PONG","uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
+SENDING DATA: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
+```
 
 And this is what it looks like on the server side:
 
-> RECEIVED DATA FROM 58237: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
-> Storing data...
-> SENDING COMMAND TO 58237: {"uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
-> RECEIVED DATA FROM 58237: {"deviceId":"simulated-device-tcp-0001","messageType":"COMMAND_RESP","commandResult":"PONG","uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
-> Storing data...
-> RECEIVED DATA FROM 58237: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
-> Storing data...
+```
+RECEIVED DATA FROM 58237: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
+Storing data...
+SENDING COMMAND TO 58237: {"uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
+RECEIVED DATA FROM 58237: {"deviceId":"simulated-device-tcp-0001","messageType":"COMMAND_RESP","commandResult":"PONG","uuid":"a87c0038-df85-4b73-b18e-9a0ba8088024","command":"PING"}
+Storing data...
+RECEIVED DATA FROM 58237: {"deviceId":"simulated-device-tcp-0001","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
+Storing data...
+```
 
 ### What we learned
 
@@ -204,21 +214,24 @@ In fact, if we dig deeper, we can see that the typical request-response messagin
 
 ## Why MQTT 
 
-**MQTT** (**M**essage **Q**ueuing **T**elemetry **T**ransport), to quote the specification, *is a Client Server publish/subscribe messaging transport protocol. It is light weight, open, simple, and designed to be easy to implement. These characteristics make it ideal for use in many situations, including constrained environments such as for communication in Machine to Machine (M2M) and Internet of Things (IoT) contexts where a small code footprint is required and/or network bandwidth is at a premium.*
+[**MQTT**](https://mqtt.org) (**M**essage **Q**ueuing **T**elemetry **T**ransport), to quote the specification:
 
-*The protocol runs over TCP/IP, or over other network protocols that provide ordered, lossless, bi-directional connections. Its features include:*
-
-- *Use of the publish/subscribe message pattern which provides one-to-many message distribution and decoupling of applications.*
-- *A messaging transport that is agnostic to the content of the payload.*
-
-- *Three qualities of service for message delivery:*
-  - *"At most once", where messages are delivered according to the best efforts of the operating environment. Message loss can occur. This level could be used, for example, with ambient sensor data where it does not matter if an individual reading is lost as the next one will be published soon after.*
-  - *"At least once", where messages are assured to arrive but duplicates can occur.*
-
-  - *"Exactly once", where messages are assured to arrive exactly once. This level could be used, for example, with billing systems where duplicate or lost messages could lead to incorrect charges being applied.*
-
-- *A small transport overhead and protocol exchanges minimized to reduce network traffic.*
-- *A mechanism to notify interested parties when an abnormal disconnection occurs.*
+> MQTT is a Client Server publish/subscribe messaging transport protocol. It is light weight, open, simple, and designed to be easy to implement. These characteristics make it ideal for use in many situations, including constrained environments such as for communication in Machine to Machine (M2M) and Internet of Things (IoT) contexts where a small code footprint is required and/or network bandwidth is at a premium.
+>
+> The protocol runs over TCP/IP, or over other network protocols that provide ordered, lossless, bi-directional connections. Its features include:
+>
+> - Use of the publish/subscribe message pattern which provides one-to-many message distribution and decoupling of applications.
+> - A messaging transport that is agnostic to the content of the payload.
+>
+> - Three qualities of service for message delivery:
+>   - "At most once", where messages are delivered according to the best efforts of the operating environment. Message loss can occur. This level could be used, for example, with ambient sensor data where it does not matter if an individual reading is lost as the next one will be published soon after.
+>   - "At least once", where messages are assured to arrive but duplicates can occur.
+>
+>   - "Exactly once", where messages are assured to arrive exactly once. This level could be used, for example, with billing systems where duplicate or lost messages could lead to incorrect charges being applied.
+>
+> - A small transport overhead and protocol exchanges minimized to reduce network traffic.
+> - A mechanism to notify interested parties when an abnormal disconnection occurs.
+>
 
 So we can see that MQTT has several positive features important for us:
 
@@ -522,7 +535,7 @@ process.once("SIGINT", () => {
 
 The configuration is, again, stored in environment variables. This is the configuration we will be using
 
-```json
+```properties
 DEVICE_ID=sim-iot-device-0001
 BROKER=mqtt://broker.hivemq.com
 DATA_TOPIC=mqtt/blog/examples/data
@@ -542,10 +555,12 @@ $ node mqtt\iot-server.js
 
 Will output
 
-> [SERVER] STARTING MQTT IOT SERVER
-> [SERVER] CONNECTED TO MQTT BROKER
-> [SERVER] SUBSCRIBING TO TOPICS mqtt/blog/examples/data/+,mqtt/blog/examples/cmd/resp/+,mqtt/blog/examples/register/+
-> [SERVER] SUCCESSFULLY SUBSCRIBED
+```
+[SERVER] STARTING MQTT IOT SERVER
+[SERVER] CONNECTED TO MQTT BROKER
+[SERVER] SUBSCRIBING TO TOPICS mqtt/blog/examples/data/+,mqtt/blog/examples/cmd/resp/+,mqtt/blog/examples/register/+
+[SERVER] SUCCESSFULLY SUBSCRIBED
+```
 
 To start seeing some more action we're going to have to start the device
 
@@ -555,44 +570,55 @@ $ node mqtt\iot-device.js
 
 Which will output
 
-> [DEVICE] STARTING MQTT IOT DEVICE <sim-iot-device-0001>
-> [DEVICE] SUBSCRIBING AND SENDING SIGN IN MESSAGE
-> [DEVICE] CONNECTING TO BROKER AND SENDING DATA EVERY 15 SECONDS
-> [DEVICE] SUCCESSFULLY SUBSCRIBED
+```
+[DEVICE] STARTING MQTT IOT DEVICE <sim-iot-device-0001>
+[DEVICE] SUBSCRIBING AND SENDING SIGN IN MESSAGE
+[DEVICE] CONNECTING TO BROKER AND SENDING DATA EVERY 15 SECONDS
+[DEVICE] SUCCESSFULLY SUBSCRIBED
+```
 
 The server will only receive the register message for now
 
-> [SERVER] RECEIVED MESSAGE "SIGN_IN" ON TOPIC mqtt/blog/examples/register/sim-iot-device-0001
+```
+[SERVER] RECEIVED MESSAGE "SIGN_IN" ON TOPIC mqtt/blog/examples/register/sim-iot-device-0001
+```
 
 But it will soon send a command to the device, before the device is actually connected
 
-> [SERVER] SENDING COMMAND TO sim-iot-device-0011: {"uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}
+```
+[SERVER] SENDING COMMAND TO sim-iot-device-0011: {"uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}
+```
 
 Once the 15 seconds are up, the device will connect and attempt to subscribe and publish data, but it will also immediately receive the command that was published while it was offline.
 
-> [DEVICE] CONNECTED TO MQTT BROKER
-> [DEVICE] SUBSCRIBING TO TOPICS mqtt/blog/examples/cmd/req/sim-iot-device-0011
-> [DEVICE] SENDING DATA: {"deviceId":"sim-iot-device-0011","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
-> [DEVICE] SUCCESSFULLY SUBSCRIBED
-> [DEVICE] RECEIVED COMMAND "{"uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}"
-> [DEVICE] SENDING COMMAND RESPONSE {"deviceId":"sim-iot-device-0011", "messageType":"commandResp","commandResult":"PONG","uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}
-> [DEVICE] WAITING FOR 5 SECONDS
-> [DEVICE] CLOSING CONNECTION TO MQTT BROKER
+```
+[DEVICE] CONNECTED TO MQTT BROKER
+[DEVICE] SUBSCRIBING TO TOPICS mqtt/blog/examples/cmd/req/sim-iot-device-0011
+[DEVICE] SENDING DATA: {"deviceId":"sim-iot-device-0011","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}
+[DEVICE] SUCCESSFULLY SUBSCRIBED
+[DEVICE] RECEIVED COMMAND "{"uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}"
+[DEVICE] SENDING COMMAND RESPONSE {"deviceId":"sim-iot-device-0011", "messageType":"commandResp","commandResult":"PONG","uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}
+[DEVICE] WAITING FOR 5 SECONDS
+[DEVICE] CLOSING CONNECTION TO MQTT BROKER
+```
 
 On the server side we can see that we receive both the data and command response message
 
-> [SERVER] RECEIVED MESSAGE "{"deviceId":"sim-iot-device-0011","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}" ON TOPIC mqtt/blog/examples/data/sim-iot-device-0011
-> [SERVER] Storing data...
-> [SERVER] RECEIVED MESSAGE "{"deviceId":"sim-iot-device-0011","messageType":"commandResp","commandResult":"PONG","uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}" ON TOPIC mqtt/blog/examples/cmd/resp/sim-iot-device-0011
-> [SERVER] Storing data...
+```
+[SERVER] RECEIVED MESSAGE "{"deviceId":"sim-iot-device-0011","messageType":"DATA","temp":23.6,"lat":48.015722,"lng":-88.625528}" ON TOPIC mqtt/blog/examples/data/sim-iot-device-0011
+[SERVER] Storing data...
+[SERVER] RECEIVED MESSAGE "{"deviceId":"sim-iot-device-0011","messageType":"commandResp","commandResult":"PONG","uuid":"37e0c761-0320-435a-8011-013859544c00","command":"PING"}" ON TOPIC mqtt/blog/examples/cmd/resp/sim-iot-device-0011
+[SERVER] Storing data...
+```
 
 And soon after that the server will again send a command. The device may already be offline by then, but it doesn't matter as we know it is connected with a persistent session and will receive the command when it reconnects.
 
 Once we stop our device (using Ctrl+C) we can see the device sending a sign-out message and the server receiving it.
 
-> [DEVICE] ENDING SIGN OUT MESSAGE
->
-> [SERVER] RECEIVED MESSAGE "SIGN_OUT" ON TOPIC mqtt/blog/examples/register/sim-iot-device-0001
+```
+[DEVICE] ENDING SIGN OUT MESSAGE
+[SERVER] RECEIVED MESSAGE "SIGN_OUT" ON TOPIC mqtt/blog/examples/register/sim-iot-device-0001
+```
 
 In fact, if we stopped the device while it was connected to the broker we will get the second output twice. Once because we're manually sending it after catching the SIGINT signal and once by the broker since the connection was not closed gracefully.
 

@@ -10,7 +10,9 @@ This is the repository for the examples demonstrating two-way communication usin
 
 ### Install dependencies
 
-- `npm install`
+- ```shell
+  npm install
+  ```
 
 ### Configure
 
@@ -18,7 +20,7 @@ All configuration should be passed via environment variables. Either set the var
 
 #### TCP
 
-```
+```properties
 DEVICE_ID=sim-iot-device-1234
 SERVER_HOST=127.0.0.1
 SERVER_PORT=30000
@@ -26,7 +28,7 @@ SERVER_PORT=30000
 
 #### MQTT
 
-```
+```properties
 DEVICE_ID=sim-iot-device-1234
 BROKER=mqtt://broker.hivemq.com
 DATA_TOPIC=mqtt/blog/examples/data
@@ -44,13 +46,13 @@ Each example requires you to run 2 applications; one is the simulating an IoT de
 
 Start the server first
 
-```
+```shell
 node tcp/iot-server.js
 ```
 
 Then start the device
 
-```
+```shell
 node tcp/iot-device.js
 ```
 
@@ -60,13 +62,13 @@ They should start sending messages to each other immediately.
 
 Start the server first
 
-```
+```shell
 node mqtt/iot-server.js
 ```
 
 Then start the device
 
-```
+```shell
 node mqtt/iot-server.js
 ```
 
